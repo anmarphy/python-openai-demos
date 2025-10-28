@@ -25,6 +25,8 @@ class Records(BaseModel):
     age: str
     date: str
     result: list[Result]
+    total_results: str
+    total_not_in_range: str
 
 #If the results were available in a CSV file, we could load them as follows:
 with open("exam_results.csv") as file:
@@ -44,10 +46,14 @@ for filename in filenames:
 completion = client.beta.chat.completions.parse(
     model=MODEL_NAME,
     messages=[
-        {"role": "system", "content": "Extract the exam results. As the file it is in Spanish, remove the accents characters. Return a JSON object with the following fields: patient (string), id (string), age (string), date (string), result (a list of objects with exam (string), value (string), the range of the exam (string) and the value in range checking if the values satisfy the range condition ('Yes' or 'No')). If any field is missing, return a refusal message indicating which field is missing."},
+        {"role": "system", "content": "Extract the exam results. As the file it is in Spanish, remove the accents characters. "
+        "Return a JSON object with the following fields: patient (string), id (string), age (string), date (string), result (a list of objects with exam (string), value (string), the range of the exam (string) and the value in range checking if the values satisfy the range condition ('Yes' or 'No')). "
+        "Calculate total_results (string) as the total number of results."
+        "Calculate total_not_in_range (string) as the number of results where value is not in range."
+        "If any field is missing, return a refusal message indicating which field is missing."},
         {"role": "user", "content": f"Sources: {all_chunks}"},
     ],
-    response_format=Records,
+    response_format=Records
 )
 
 
@@ -62,4 +68,8 @@ else:
     #Return a json file with the extracted data
     with open("extracted_results.json", "w") as f:
         json.dump(event.dict(), f, indent=4)    
+
+
+
+
     
