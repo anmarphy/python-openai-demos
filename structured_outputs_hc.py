@@ -15,6 +15,8 @@ MODEL_NAME = os.getenv("GITHUB_MODEL", "openai/gpt-4o")
 class Result(BaseModel):
     exam: str
     value: str
+    ranges: str
+    value_in_range: str
 
 
 class Records(BaseModel):
@@ -42,7 +44,7 @@ for filename in filenames:
 completion = client.beta.chat.completions.parse(
     model=MODEL_NAME,
     messages=[
-        {"role": "system", "content": "Extract the exam results. As the file it is in Spanish, remove the accents characters. Return a JSON object with the following fields: patient (string), id (string), age (string), date (string), result (a list of objects with exam (string) and value (string)). If any field is missing, return a refusal message indicating which field is missing."},
+        {"role": "system", "content": "Extract the exam results. As the file it is in Spanish, remove the accents characters. Return a JSON object with the following fields: patient (string), id (string), age (string), date (string), result (a list of objects with exam (string), value (string), the range of the exam (string) and the value in range checking if the values satisfy the range condition ('Yes' or 'No')). If any field is missing, return a refusal message indicating which field is missing."},
         {"role": "user", "content": f"Sources: {all_chunks}"},
     ],
     response_format=Records,
